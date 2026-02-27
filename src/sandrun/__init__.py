@@ -19,23 +19,18 @@ from sandrun.stager import PackageStager
 from sandrun.stager import TarballStager
 
 __all__ = [
-    # Core types
+    "CondaOfflineInstaller",
+    "DepInstaller",
     "ExecResult",
+    "NoopDepInstaller",
+    "PackageSpec",
+    "PackageStager",
     "Resources",
     "SandboxBackend",
     "SandboxConfig",
-    "PackageSpec",
-    # Backend resolution
-    "get_backend",
-    # Staging
-    "PackageStager",
-    "TarballStager",
-    # Installation
-    "DepInstaller",
-    "NoopDepInstaller",
-    "CondaOfflineInstaller",
-    "UvDepInstaller",
-    # Runner
     "SandboxRunner",
     "SandboxRunnerError",
+    "TarballStager",
+    "UvDepInstaller",
+    "get_backend",
 ]
