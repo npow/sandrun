@@ -61,7 +61,9 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Pip package to install before running (repeatable)",
     )
     run.add_argument("--cpu", type=int, default=1, metavar="N", help="CPUs (default: 1)")
-    run.add_argument("--memory", type=int, default=1024, metavar="MB", help="Memory in MB (default: 1024)")
+    run.add_argument(
+        "--memory", type=int, default=1024, metavar="MB", help="Memory in MB (default: 1024)"
+    )
     run.add_argument("--gpu", default=None, metavar="SPEC", help="GPU spec (backend-specific)")
     run.add_argument(
         "--env", "-e",
@@ -70,7 +72,9 @@ def _build_parser() -> argparse.ArgumentParser:
         metavar="KEY=VALUE",
         help="Environment variable (repeatable)",
     )
-    run.add_argument("--timeout", type=int, default=300, metavar="SEC", help="Timeout in seconds (default: 300)")
+    run.add_argument(
+        "--timeout", type=int, default=300, metavar="SEC", help="Timeout in seconds (default: 300)"
+    )
     run.add_argument("--image", default=None, metavar="IMAGE", help="Sandbox image override")
 
     return parser

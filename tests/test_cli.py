@@ -8,9 +8,8 @@ from unittest.mock import patch
 import pytest
 
 from sandrun.backend import ExecResult
-from sandrun.cli import main
 from sandrun.cli import _build_parser
-
+from sandrun.cli import main
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -71,7 +70,9 @@ class TestArgParsing:
         assert args.packages == ["requests", "numpy"]
 
     def test_resources(self) -> None:
-        args = _build_parser().parse_args(["run", "--cpu", "4", "--memory", "8192", "--gpu", "T4", "script.py"])
+        args = _build_parser().parse_args(
+            ["run", "--cpu", "4", "--memory", "8192", "--gpu", "T4", "script.py"]
+        )
         assert args.cpu == 4
         assert args.memory == 8192
         assert args.gpu == "T4"

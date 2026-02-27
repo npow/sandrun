@@ -147,9 +147,8 @@ def _exclude_filter(tarinfo: tarfile.TarInfo) -> tarfile.TarInfo | None:
 def _build_cwd_tarball() -> str:
     fd, path = tempfile.mkstemp(suffix=".tar", prefix="sandrun-code-")
     try:
-        with os.fdopen(fd, "wb") as f:
-            with tarfile.open(fileobj=f, mode="w") as tar:
-                tar.add(".", filter=_exclude_filter)
+        with os.fdopen(fd, "wb") as f, tarfile.open(fileobj=f, mode="w") as tar:
+            tar.add(".", filter=_exclude_filter)
     except Exception:
         with contextlib.suppress(OSError):
             os.unlink(path)
@@ -213,7 +212,8 @@ def _make_wrapper(
                     _backend.upload(sandbox_id, runner_path, _REMOTE_RUNNER)
 
                     setup = "\n".join(stager.setup_commands())
-                    script = f"export SANDRUN_SANDBOX_ID={shlex.quote(sandbox_id)}\n{setup}\n{run_cmd}"
+                    sid = shlex.quote(sandbox_id)
+                    script = f"export SANDRUN_SANDBOX_ID={sid}\n{setup}\n{run_cmd}"
 
                     on_stdout = print if streaming else None
 

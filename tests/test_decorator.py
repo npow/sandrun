@@ -2,9 +2,7 @@
 
 from __future__ import annotations
 
-import os
 import pickle
-import tempfile
 from unittest.mock import MagicMock
 from unittest.mock import patch
 
@@ -16,7 +14,6 @@ from sandrun.decorator import boxlite
 from sandrun.decorator import daytona
 from sandrun.decorator import e2b
 from sandrun.decorator import sandbox
-
 
 # ---------------------------------------------------------------------------
 # Helpers
