@@ -20,15 +20,14 @@ import time
 from typing import TYPE_CHECKING
 from typing import Callable
 
-from sandrun._micromamba import is_compatible_linux_micromamba
 from sandrun._micromamba import micromamba_path_export
 from sandrun._micromamba import micromamba_stage_upload_spec
 from sandrun._micromamba import resolve_micromamba
-from sandrun.backend import ExecResult
-from sandrun.backend import SandboxConfig
 
 if TYPE_CHECKING:
+    from sandrun.backend import ExecResult
     from sandrun.backend import SandboxBackend
+    from sandrun.backend import SandboxConfig
     from sandrun.installer import DepInstaller
     from sandrun.stager import PackageStager
 
@@ -77,9 +76,9 @@ class SandboxRunner:
 
     def __init__(
         self,
-        backend: "SandboxBackend",
-        stager: "PackageStager | None" = None,
-        installer: "DepInstaller | None" = None,
+        backend: SandboxBackend,
+        stager: PackageStager | None = None,
+        installer: DepInstaller | None = None,
         stage_micromamba: bool | None = None,
         max_infra_retries: int | None = None,
     ) -> None:

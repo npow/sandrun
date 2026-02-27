@@ -19,7 +19,6 @@ import tarfile
 import tempfile
 from pathlib import Path
 
-
 _DEFAULT_CACHE_ROOT = os.path.join(Path.home(), ".cache", "sandrun", "micromamba")
 
 

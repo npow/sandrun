@@ -12,6 +12,7 @@ uploads it to the sandbox, and returns shell commands to extract it.
 
 from __future__ import annotations
 
+import contextlib
 import os
 import shlex
 import tempfile
@@ -41,7 +42,7 @@ class PackageStager(ABC):
     """
 
     @abstractmethod
-    def deliver(self, backend: "SandboxBackend", sandbox_id: str) -> None:
+    def deliver(self, backend: SandboxBackend, sandbox_id: str) -> None:
         """Upload the staged package to the sandbox."""
 
     @abstractmethod
@@ -78,7 +79,7 @@ class TarballStager(PackageStager):
         self._local_path = local_path
 
     @classmethod
-    def from_bytes(cls, data: bytes) -> "TarballStager":
+    def from_bytes(cls, data: bytes) -> TarballStager:
         """Write *data* to a temp file and return a :class:`TarballStager`.
 
         The temp file is created with a `.tar` suffix in the system temp
@@ -90,10 +91,8 @@ class TarballStager(PackageStager):
             with os.fdopen(fd, "wb") as f:
                 f.write(data)
         except Exception:
-            try:
+            with contextlib.suppress(OSError):
                 os.unlink(path)
-            except OSError:
-                pass
             raise
         return cls(path)
 
@@ -102,7 +101,7 @@ class TarballStager(PackageStager):
         """Local path to the staged tarball."""
         return self._local_path
 
-    def deliver(self, backend: "SandboxBackend", sandbox_id: str) -> None:
+    def deliver(self, backend: SandboxBackend, sandbox_id: str) -> None:
         """Upload the tarball to the sandbox at ``_REMOTE_CODE_ARCHIVE``."""
         backend.upload(sandbox_id, self._local_path, _REMOTE_CODE_ARCHIVE)
 
@@ -116,7 +115,5 @@ class TarballStager(PackageStager):
 
     def cleanup(self) -> None:
         """Delete the local temp file.  Safe to call multiple times."""
-        try:
+        with contextlib.suppress(OSError):
             Path(self._local_path).unlink(missing_ok=True)
-        except OSError:
-            pass

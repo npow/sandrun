@@ -32,12 +32,10 @@ from abc import abstractmethod
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from sandrun._micromamba import REMOTE_MICROMAMBA_PATH
-from sandrun._micromamba import STAGING_BIN_DIR
 from sandrun._micromamba import micromamba_path_export
-from sandrun._types import PackageSpec
 
 if TYPE_CHECKING:
+    from sandrun._types import PackageSpec
     from sandrun.backend import SandboxBackend
 
 # Remote path where packages are staged inside the sandbox.
@@ -84,7 +82,7 @@ class DepInstaller(ABC):
         """
 
     @abstractmethod
-    def stage(self, backend: "SandboxBackend", sandbox_id: str) -> None:
+    def stage(self, backend: SandboxBackend, sandbox_id: str) -> None:
         """Upload the staged packages to the sandbox.
 
         Must be called after :meth:`prepare` and after the sandbox is created.
@@ -99,7 +97,7 @@ class DepInstaller(ABC):
         """
 
     @classmethod
-    def from_staged(cls, staging_dir: str) -> "DepInstaller":  # type: ignore[return]
+    def from_staged(cls, staging_dir: str) -> DepInstaller:  # type: ignore[return]
         """Reconstruct an installer from an already-prepared staging directory.
 
         Used when the host prepared deps before launching the sandbox (e.g.
@@ -116,14 +114,14 @@ class NoopDepInstaller(DepInstaller):
     def prepare(self, specs: list[PackageSpec], target_arch: str = "linux-64") -> None:
         pass
 
-    def stage(self, backend: "SandboxBackend", sandbox_id: str) -> None:
+    def stage(self, backend: SandboxBackend, sandbox_id: str) -> None:
         pass
 
     def setup_commands(self) -> list[str]:
         return []
 
     @classmethod
-    def from_staged(cls, staging_dir: str) -> "NoopDepInstaller":
+    def from_staged(cls, staging_dir: str) -> NoopDepInstaller:
         return cls()
 
 
@@ -177,7 +175,7 @@ class CondaOfflineInstaller(DepInstaller):
         self._pip_packages: list[str] = []
 
     @classmethod
-    def from_staged(cls, staging_dir: str) -> "CondaOfflineInstaller":
+    def from_staged(cls, staging_dir: str) -> CondaOfflineInstaller:
         """Reconstruct from an already-prepared *staging_dir*.
 
         Reads the manifest written by :meth:`prepare` to rebuild the
@@ -278,7 +276,7 @@ class CondaOfflineInstaller(DepInstaller):
             tmp.unlink(missing_ok=True)
             raise
 
-    def stage(self, backend: "SandboxBackend", sandbox_id: str) -> None:
+    def stage(self, backend: SandboxBackend, sandbox_id: str) -> None:
         """Upload all staged packages to the sandbox."""
         if not self._staged_files:
             return
@@ -351,7 +349,7 @@ class UvDepInstaller(DepInstaller):
         self._wheel_names: list[str] = []
 
     @classmethod
-    def from_pep723(cls, script_path: str) -> "UvDepInstaller":
+    def from_pep723(cls, script_path: str) -> UvDepInstaller:
         """Create an installer by reading PEP 723 inline script metadata.
 
         The script must contain a ``# /// script`` block with
@@ -363,13 +361,13 @@ class UvDepInstaller(DepInstaller):
         return cls._from_pep723_path(script_path)
 
     @classmethod
-    def _from_pep723_path(cls, script_path: str) -> "UvDepInstaller":
+    def _from_pep723_path(cls, script_path: str) -> UvDepInstaller:
         inst = cls()
         inst._script_path = script_path
         return inst
 
     @classmethod
-    def from_staged(cls, staging_dir: str) -> "UvDepInstaller":
+    def from_staged(cls, staging_dir: str) -> UvDepInstaller:
         """Reconstruct from an already-prepared *staging_dir*."""
         inst = cls(staging_dir=staging_dir)
         manifest = Path(staging_dir) / cls._MANIFEST_NAME
@@ -439,7 +437,7 @@ class UvDepInstaller(DepInstaller):
             "\n".join(manifest_lines) + "\n"
         )
 
-    def stage(self, backend: "SandboxBackend", sandbox_id: str) -> None:
+    def stage(self, backend: SandboxBackend, sandbox_id: str) -> None:
         """Upload all downloaded wheels to the sandbox."""
         if not self._wheel_names:
             return

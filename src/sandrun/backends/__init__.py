@@ -20,10 +20,11 @@ if TYPE_CHECKING:
 _BACKENDS: dict[str, tuple[str, str]] = {
     "daytona": (".daytona", "DaytonaBackend"),
     "e2b": (".e2b", "E2BBackend"),
+    "boxlite": (".boxlite", "BoxliteBackend"),
 }
 
 
-def get_backend(name: str) -> "SandboxBackend":
+def get_backend(name: str) -> SandboxBackend:
     """Resolve a backend by name with lazy import.
 
     Raises a helpful error if the backend's SDK is not installed,

@@ -3,17 +3,13 @@
 from __future__ import annotations
 
 from unittest.mock import MagicMock
-from unittest.mock import patch
 
 import pytest
 
 from sandrun.backend import ExecResult
-from sandrun.backend import Resources
 from sandrun.backend import SandboxConfig
 from sandrun.installer import NoopDepInstaller
 from sandrun.runner import SandboxRunner
-from sandrun.runner import SandboxRunnerError
-
 
 # ---------------------------------------------------------------------------
 # Helpers

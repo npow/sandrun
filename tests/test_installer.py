@@ -2,20 +2,20 @@
 
 from __future__ import annotations
 
-import os
-import tempfile
-from pathlib import Path
+from typing import TYPE_CHECKING
 from unittest.mock import MagicMock
 from unittest.mock import patch
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 import pytest
 
 from sandrun._types import PackageSpec
+from sandrun.installer import _REMOTE_PKGS_DIR
 from sandrun.installer import CondaOfflineInstaller
 from sandrun.installer import NoopDepInstaller
 from sandrun.installer import UvDepInstaller
-from sandrun.installer import _REMOTE_PKGS_DIR
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -84,8 +84,6 @@ class TestCondaOfflineInstallerPrepare:
 
     def test_writes_manifest(self, tmp_path: Path) -> None:
         pkg = _conda_spec()
-        fake_bytes = b"fake conda pkg"
-
         inst = CondaOfflineInstaller(staging_dir=str(tmp_path))
         with patch.object(CondaOfflineInstaller, "_download", side_effect=_fake_download):
             inst.prepare([pkg])
@@ -176,9 +174,11 @@ class TestUvDepInstaller:
     def test_prepare_raises_if_uv_missing(self, tmp_path: Path) -> None:
         spec = _pip_spec()
         inst = UvDepInstaller(staging_dir=str(tmp_path))
-        with patch("subprocess.run", side_effect=FileNotFoundError):
-            with pytest.raises(RuntimeError, match="uv not found"):
-                inst.prepare([spec], "linux-64")
+        with (
+            patch("subprocess.run", side_effect=FileNotFoundError),
+            pytest.raises(RuntimeError, match="uv not found"),
+        ):
+            inst.prepare([spec], "linux-64")
 
     def test_from_staged_reads_manifest(self, tmp_path: Path) -> None:
         spec = _pip_spec()

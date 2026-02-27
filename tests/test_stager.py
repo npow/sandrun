@@ -9,9 +9,9 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from sandrun.stager import TarballStager
 from sandrun.stager import _REMOTE_CODE_ARCHIVE
 from sandrun.stager import _REMOTE_WORK_DIR
+from sandrun.stager import TarballStager
 
 
 class TestTarballStager:

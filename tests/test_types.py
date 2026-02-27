@@ -43,7 +43,7 @@ class TestPackageSpec:
 
     def test_frozen(self) -> None:
         spec = PackageSpec(url="http://x.com/p.whl", filename="p.whl", pkg_type="pip")
-        with pytest.raises(Exception):  # FrozenInstanceError
+        with pytest.raises(AttributeError):  # FrozenInstanceError is a subclass
             spec.url = "something else"  # type: ignore[misc]
 
     def test_environment_marker(self) -> None:
