@@ -21,6 +21,7 @@ from sandrun.installer import UvDepInstaller
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _conda_spec(filename: str = "numpy-1.24.0.conda") -> PackageSpec:
     return PackageSpec(
         url=f"https://conda.anaconda.org/conda-forge/linux-64/{filename}",
@@ -51,6 +52,7 @@ def _synthetic_spec() -> PackageSpec:
 # NoopDepInstaller
 # ---------------------------------------------------------------------------
 
+
 class TestNoopDepInstaller:
     def test_prepare_is_noop(self) -> None:
         inst = NoopDepInstaller()
@@ -73,6 +75,7 @@ class TestNoopDepInstaller:
 # ---------------------------------------------------------------------------
 # CondaOfflineInstaller — download logic is stubbed
 # ---------------------------------------------------------------------------
+
 
 class TestCondaOfflineInstallerPrepare:
     def test_skips_synthetic_packages(self, tmp_path: Path) -> None:
@@ -146,6 +149,7 @@ class TestCondaOfflineInstallerPrepare:
 # UvDepInstaller — subprocess is stubbed
 # ---------------------------------------------------------------------------
 
+
 class TestUvDepInstaller:
     def test_prepare_skips_conda_specs(self, tmp_path: Path) -> None:
         inst = UvDepInstaller(staging_dir=str(tmp_path))
@@ -208,6 +212,7 @@ class TestUvDepInstaller:
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _fake_download(url: str, dest: Path, hashes: dict) -> None:
     """Write fake bytes to dest without network access."""

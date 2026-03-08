@@ -163,8 +163,7 @@ class CondaOfflineInstaller(DepInstaller):
             self._owns_staging_dir = False
 
         self._cache_dir = Path(
-            cache_dir
-            or os.environ.get("SANDRUN_PACKAGE_CACHE_DIR", _DEFAULT_CACHE_ROOT)
+            cache_dir or os.environ.get("SANDRUN_PACKAGE_CACHE_DIR", _DEFAULT_CACHE_ROOT)
         )
         self._cache_dir.mkdir(parents=True, exist_ok=True)
 
@@ -267,8 +266,7 @@ class CondaOfflineInstaller(DepInstaller):
                     h = hashlib.new(alg, data).hexdigest()
                     if h != expected:
                         raise ValueError(
-                            f"Hash mismatch for {url}: "
-                            f"{alg}={h!r}, expected {expected!r}"
+                            f"Hash mismatch for {url}: {alg}={h!r}, expected {expected!r}"
                         )
             tmp.write_bytes(data)
             os.replace(tmp, dest)
@@ -433,9 +431,7 @@ class UvDepInstaller(DepInstaller):
             self._wheel_names.append(path.name)
             manifest_lines.append(path.name)
 
-        (Path(self._staging_dir) / self._MANIFEST_NAME).write_text(
-            "\n".join(manifest_lines) + "\n"
-        )
+        (Path(self._staging_dir) / self._MANIFEST_NAME).write_text("\n".join(manifest_lines) + "\n")
 
     def stage(self, backend: SandboxBackend, sandbox_id: str) -> None:
         """Upload all downloaded wheels to the sandbox."""

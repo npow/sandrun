@@ -161,9 +161,7 @@ class DaytonaBackend(SandboxBackend):
         sandbox = self._get_sandbox(sandbox_id)
         remote_script = f"/tmp/sandrun-{uuid.uuid4().hex}.sh"
         sandbox.fs.upload_file(script.encode("utf-8"), remote_script)
-        command = (
-            f"bash -lc {shlex.quote(f'chmod 700 {remote_script} && bash {remote_script}')}"
-        )
+        command = f"bash -lc {shlex.quote(f'chmod 700 {remote_script} && bash {remote_script}')}"
         try:
             for attempt in range(3):
                 response = sandbox.process.exec(command, timeout=timeout)
@@ -215,9 +213,7 @@ class DaytonaBackend(SandboxBackend):
         remote_script = f"/tmp/sandrun-{uuid.uuid4().hex}.sh"
 
         sandbox.fs.upload_file(script.encode("utf-8"), remote_script)
-        command = (
-            f"bash -lc {shlex.quote(f'chmod 700 {remote_script} && bash {remote_script}')}"
-        )
+        command = f"bash -lc {shlex.quote(f'chmod 700 {remote_script} && bash {remote_script}')}"
 
         try:
             sandbox.process.create_session(session_id)

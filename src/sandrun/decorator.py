@@ -49,12 +49,21 @@ _REMOTE_RESULT = "/tmp/_sandrun_result.pkl"
 _REMOTE_RUNNER = "/tmp/_sandrun_runner.py"
 
 _EXCLUDE_DIRS = {
-    ".git", ".hg", ".svn",
-    "__pycache__", ".pytest_cache", ".mypy_cache", ".ruff_cache",
-    ".tox", ".nox",
+    ".git",
+    ".hg",
+    ".svn",
+    "__pycache__",
+    ".pytest_cache",
+    ".mypy_cache",
+    ".ruff_cache",
+    ".tox",
+    ".nox",
     "node_modules",
-    ".venv", "venv", "env",
-    "dist", "build",
+    ".venv",
+    "venv",
+    "env",
+    "dist",
+    "build",
 }
 _EXCLUDE_EXTENSIONS = {".pyc", ".pyo", ".so", ".dylib", ".dll"}
 
@@ -62,6 +71,7 @@ _EXCLUDE_EXTENSIONS = {".pyc", ".pyo", ".so", ".dylib", ".dll"}
 # ---------------------------------------------------------------------------
 # Runner script
 # ---------------------------------------------------------------------------
+
 
 def _build_runner_script(module_spec: str, qualname: str, is_file: bool) -> str:
     """Python script that runs inside the sandbox: loads fn, calls it, writes result."""
@@ -73,10 +83,7 @@ def _build_runner_script(module_spec: str, qualname: str, is_file: bool) -> str:
             "_spec.loader.exec_module(_mod)\n"
         )
     else:
-        import_block = (
-            "import importlib as _il\n"
-            f"_mod = _il.import_module({module_spec!r})\n"
-        )
+        import_block = f"import importlib as _il\n_mod = _il.import_module({module_spec!r})\n"
 
     return f"""\
 import sys, os, pickle
@@ -106,6 +113,7 @@ with open({_REMOTE_RESULT!r}, 'wb') as _f:
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _fn_import_spec(fn: Callable) -> tuple[str, str, bool]:
     """Return ``(module_spec, qualname, is_file)`` for *fn*."""
@@ -159,6 +167,7 @@ def _build_cwd_tarball() -> str:
 # ---------------------------------------------------------------------------
 # Core wrapper
 # ---------------------------------------------------------------------------
+
 
 def _make_wrapper(
     fn: Callable,
@@ -265,6 +274,7 @@ def _make_wrapper(
 # ---------------------------------------------------------------------------
 # Public decorators
 # ---------------------------------------------------------------------------
+
 
 class SandboxFunctionError(RuntimeError):
     """Raised when a sandboxed function fails for infrastructure reasons."""

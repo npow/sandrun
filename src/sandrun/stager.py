@@ -73,9 +73,7 @@ class TarballStager(PackageStager):
 
     def __init__(self, local_path: str) -> None:
         if not os.path.isfile(local_path):
-            raise FileNotFoundError(
-                f"TarballStager: local_path does not exist: {local_path!r}"
-            )
+            raise FileNotFoundError(f"TarballStager: local_path does not exist: {local_path!r}")
         self._local_path = local_path
 
     @classmethod

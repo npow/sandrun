@@ -15,6 +15,7 @@ from sandrun.runner import SandboxRunner
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _make_backend(exit_code: int = 0) -> MagicMock:
     backend = MagicMock()
     backend.create.return_value = "sb-test-1"
@@ -31,6 +32,7 @@ def _make_config() -> SandboxConfig:
 # ---------------------------------------------------------------------------
 # Tests
 # ---------------------------------------------------------------------------
+
 
 class TestSandboxRunnerLifecycle:
     def test_creates_and_destroys_sandbox(self) -> None:
@@ -107,9 +109,7 @@ class TestSandboxRunnerInstaller:
 
     def test_noop_installer_no_stage_calls(self) -> None:
         backend = _make_backend()
-        runner = SandboxRunner(
-            backend, installer=NoopDepInstaller(), stage_micromamba=False
-        )
+        runner = SandboxRunner(backend, installer=NoopDepInstaller(), stage_micromamba=False)
         runner.run("echo hello", _make_config())
         # backend.exec is never called from stage() (noop)
         backend.exec.assert_not_called()

@@ -165,13 +165,10 @@ class SandboxRunner:
 
                 # Extra host uploads.
                 for upload in extra_uploads or []:
-                    self._backend.upload(
-                        sandbox_id, upload["local"], upload["remote"]
-                    )
+                    self._backend.upload(sandbox_id, upload["local"], upload["remote"])
                     if "mode" in upload:
                         chmod_cmds.append(
-                            f"chmod {shlex.quote(upload['mode'])} "
-                            f"{shlex.quote(upload['remote'])}"
+                            f"chmod {shlex.quote(upload['mode'])} {shlex.quote(upload['remote'])}"
                         )
 
                 # Stage code package.
@@ -183,9 +180,7 @@ class SandboxRunner:
                     self._installer.stage(self._backend, sandbox_id)
 
                 # Build sandbox-ID-aware run command.
-                prefix_parts: list[str] = [
-                    f"export SANDRUN_SANDBOX_ID={shlex.quote(sandbox_id)}"
-                ]
+                prefix_parts: list[str] = [f"export SANDRUN_SANDBOX_ID={shlex.quote(sandbox_id)}"]
                 if should_stage_micromamba:
                     prefix_parts.append(micromamba_path_export())
                 if chmod_cmds:

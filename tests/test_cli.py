@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import textwrap
 from unittest.mock import MagicMock
 from unittest.mock import patch
 
@@ -9,11 +10,88 @@ import pytest
 
 from sandrun.backend import ExecResult
 from sandrun.cli import _build_parser
+from sandrun.cli import _parse_pep723_deps
 from sandrun.cli import main
+
+# ---------------------------------------------------------------------------
+# PEP 723 parser
+# ---------------------------------------------------------------------------
+
+
+class TestParsePep723Deps:
+    def test_no_block(self, tmp_path: pytest.TempPathFactory) -> None:
+        script = tmp_path / "s.py"
+        script.write_text("print('hello')\n")
+        assert _parse_pep723_deps(str(script)) == []
+
+    def test_missing_file(self) -> None:
+        assert _parse_pep723_deps("/nonexistent/script.py") == []
+
+    def test_single_dep(self, tmp_path: pytest.TempPathFactory) -> None:
+        script = tmp_path / "s.py"
+        script.write_text(
+            textwrap.dedent("""\
+            # /// script
+            # dependencies = ["requests"]
+            # ///
+            import requests
+        """)
+        )
+        assert _parse_pep723_deps(str(script)) == ["requests"]
+
+    def test_multiple_deps(self, tmp_path: pytest.TempPathFactory) -> None:
+        script = tmp_path / "s.py"
+        script.write_text(
+            textwrap.dedent("""\
+            # /// script
+            # dependencies = [
+            #   "requests>=2.28",
+            #   "numpy",
+            # ]
+            # ///
+        """)
+        )
+        assert _parse_pep723_deps(str(script)) == ["requests>=2.28", "numpy"]
+
+    def test_empty_dependencies(self, tmp_path: pytest.TempPathFactory) -> None:
+        script = tmp_path / "s.py"
+        script.write_text(
+            textwrap.dedent("""\
+            # /// script
+            # dependencies = []
+            # ///
+        """)
+        )
+        assert _parse_pep723_deps(str(script)) == []
+
+    def test_no_dependencies_key(self, tmp_path: pytest.TempPathFactory) -> None:
+        script = tmp_path / "s.py"
+        script.write_text(
+            textwrap.dedent("""\
+            # /// script
+            # requires-python = ">=3.11"
+            # ///
+        """)
+        )
+        assert _parse_pep723_deps(str(script)) == []
+
+    def test_deps_and_requires_python(self, tmp_path: pytest.TempPathFactory) -> None:
+        script = tmp_path / "s.py"
+        script.write_text(
+            textwrap.dedent("""\
+            # /// script
+            # requires-python = ">=3.11"
+            # dependencies = ["httpx"]
+            # ///
+        """)
+        )
+        assert _parse_pep723_deps(str(script)) == ["httpx"]
+
 
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _make_runner(exit_code: int = 0) -> MagicMock:
     runner = MagicMock()
@@ -40,6 +118,7 @@ def _run(argv: list[str], runner: MagicMock | None = None) -> int:
 # ---------------------------------------------------------------------------
 # Argument parsing
 # ---------------------------------------------------------------------------
+
 
 class TestArgParsing:
     def test_run_requires_script(self) -> None:
@@ -96,6 +175,7 @@ class TestArgParsing:
 # Exit codes
 # ---------------------------------------------------------------------------
 
+
 class TestExitCodes:
     def test_success(self) -> None:
         assert _run(["run", "script.py"], _make_runner(0)) == 0
@@ -112,6 +192,7 @@ class TestExitCodes:
 # ---------------------------------------------------------------------------
 # Script invocation in sandbox
 # ---------------------------------------------------------------------------
+
 
 class TestScriptInvocation:
     def _get_run_script(self, argv: list[str]) -> str:
@@ -155,6 +236,24 @@ class TestScriptInvocation:
 
     def test_invalid_env_exits_1(self) -> None:
         assert _run(["run", "-e", "NOEQUALSSIGN", "script.py"]) == 1
+
+    def test_pep723_deps_merged(self, tmp_path: pytest.TempPathFactory) -> None:
+        script = tmp_path / "s.py"
+        script.write_text('# /// script\n# dependencies = ["httpx"]\n# ///\nimport httpx\n')
+        runner = _make_runner()
+        _run(["run", "-p", "numpy", str(script)], runner)
+        remote_cmd = runner.run.call_args[0][0]
+        assert "httpx" in remote_cmd
+        assert "numpy" in remote_cmd
+        assert remote_cmd.index("pip install") < remote_cmd.index("python")
+
+    def test_pep723_deduplication(self, tmp_path: pytest.TempPathFactory) -> None:
+        script = tmp_path / "s.py"
+        script.write_text('# /// script\n# dependencies = ["requests"]\n# ///\n')
+        runner = _make_runner()
+        _run(["run", "-p", "requests", str(script)], runner)
+        remote_cmd = runner.run.call_args[0][0]
+        assert remote_cmd.count("requests") == 1
 
     def test_resources_in_config(self) -> None:
         runner = _make_runner()

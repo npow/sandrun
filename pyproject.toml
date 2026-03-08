@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "sandrun"
-version = "0.1.1"
+version = "0.1.2"
 description = "Run code in fast, isolated cloud sandboxes — zero Metaflow dependency"
 readme = "README.md"
 license = "Apache-2.0"
@@ -67,6 +67,14 @@ testpaths = ["tests"]
 markers = [
     "integration: tests that require sandbox credentials",
 ]
+
+[tool.coverage.run]
+source = ["src/sandrun"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+skip_covered = false
 
 [tool.mypy]
 python_version = "3.9"

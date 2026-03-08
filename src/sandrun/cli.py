@@ -12,6 +12,7 @@ from __future__ import annotations
 import argparse
 import contextlib
 import os
+import re
 import shlex
 import sys
 
@@ -21,6 +22,67 @@ from sandrun.backends import get_backend
 from sandrun.decorator import _build_cwd_tarball
 from sandrun.runner import SandboxRunner
 from sandrun.stager import TarballStager
+
+
+def _parse_pep723_deps(script_path: str) -> list[str]:
+    """Extract pip dependencies from PEP 723 inline script metadata.
+
+    Reads the ``# /// script`` block from *script_path* and returns the
+    ``dependencies`` list.  Returns an empty list if the file cannot be read,
+    has no block, or the block has no ``dependencies`` key.
+
+    Uses ``tomllib`` (stdlib 3.11+) or ``tomli`` if installed; falls back to
+    a regex parser so no third-party dependency is required.
+    """
+    try:
+        with open(script_path) as f:
+            source = f.read()
+    except OSError:
+        return []
+
+    block = re.search(
+        r"^# /// script\s*\n((?:#[^\n]*\n)*?)# ///",
+        source,
+        re.MULTILINE,
+    )
+    if not block:
+        return []
+
+    toml_lines = []
+    for line in block.group(1).splitlines():
+        if line.startswith("# "):
+            toml_lines.append(line[2:])
+        elif line.rstrip() == "#":
+            toml_lines.append("")
+    toml_text = "\n".join(toml_lines)
+
+    try:
+        import tomllib  # type: ignore[import]
+    except ImportError:
+        try:
+            import tomli as tomllib  # type: ignore[import,no-redef]
+        except ImportError:
+            tomllib = None  # type: ignore[assignment]
+
+    if tomllib is not None:
+        try:
+            return list(tomllib.loads(toml_text).get("dependencies", []))
+        except Exception:
+            return []
+
+    # Regex fallback for Python < 3.11 without tomli installed.
+    deps: list[str] = []
+    in_deps = False
+    for line in toml_text.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("dependencies"):
+            in_deps = True
+        if in_deps:
+            deps.extend(re.findall(r'"([^"]+)"', stripped))
+            deps.extend(re.findall(r"'([^']+)'", stripped))
+            if "]" in stripped:
+                break
+    return deps
 
 
 def _build_parser() -> argparse.ArgumentParser:
@@ -47,13 +109,15 @@ def _build_parser() -> argparse.ArgumentParser:
         help="Arguments forwarded to the script",
     )
     run.add_argument(
-        "--backend", "-b",
+        "--backend",
+        "-b",
         default=os.environ.get("SANDRUN_BACKEND", "boxlite"),
         metavar="NAME",
         help="Backend: boxlite (default), daytona, e2b",
     )
     run.add_argument(
-        "--package", "-p",
+        "--package",
+        "-p",
         action="append",
         dest="packages",
         default=[],
@@ -66,7 +130,8 @@ def _build_parser() -> argparse.ArgumentParser:
     )
     run.add_argument("--gpu", default=None, metavar="SPEC", help="GPU spec (backend-specific)")
     run.add_argument(
-        "--env", "-e",
+        "--env",
+        "-e",
         action="append",
         default=[],
         metavar="KEY=VALUE",
@@ -95,10 +160,14 @@ def _cmd_run(args: argparse.Namespace) -> int:
     if script_args and script_args[0] == "--":
         script_args = script_args[1:]
 
+    # Merge PEP 723 deps with --package flags (PEP 723 first, deduped).
+    pep723_pkgs = _parse_pep723_deps(args.script)
+    all_packages = list(dict.fromkeys(pep723_pkgs + args.packages))
+
     # Build the command that runs inside the sandbox.
     install_prefix = ""
-    if args.packages:
-        install_prefix = "pip install -q " + " ".join(args.packages) + " && "
+    if all_packages:
+        install_prefix = "pip install -q " + " ".join(all_packages) + " && "
 
     remote_cmd = install_prefix + "python " + shlex.quote(args.script)
     if script_args:

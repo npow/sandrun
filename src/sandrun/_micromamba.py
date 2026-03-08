@@ -86,9 +86,8 @@ def auto_download_micromamba() -> str | None:
     Raises on network errors only when the binary is explicitly required.
     """
     # Honour the legacy env var name as well as the new one.
-    cfg = (
-        os.environ.get("SANDRUN_STAGE_MICROMAMBA")
-        or os.environ.get("METAFLOW_SANDBOX_STAGE_MICROMAMBA", "")
+    cfg = os.environ.get("SANDRUN_STAGE_MICROMAMBA") or os.environ.get(
+        "METAFLOW_SANDBOX_STAGE_MICROMAMBA", ""
     )
     if cfg and cfg.lower() in ("0", "false", "no", "off"):
         return None

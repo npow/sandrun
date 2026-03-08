@@ -19,6 +19,26 @@ sandrun run --backend e2b --cpu 4 --memory 8192 train.py -- --epochs 10
 
 Your current directory is packaged and shipped to the sandbox. Output streams back in real time. Exit code propagates to the shell.
 
+**PEP 723 inline script metadata is supported automatically.** If your script declares dependencies in a `# /// script` block, sandrun reads them without any `--package` flags:
+
+```python
+# /// script
+# dependencies = [
+#   "requests>=2.28",
+#   "numpy",
+# ]
+# ///
+
+import requests, numpy
+...
+```
+
+```bash
+sandrun run script.py   # dependencies installed automatically
+```
+
+Extra `--package` flags are merged and deduplicated with inline deps.
+
 ### 2. Decorator — call a function remotely
 
 ```python
