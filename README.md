@@ -3,7 +3,7 @@
 [![CI](https://github.com/npow/sandrun/actions/workflows/ci.yml/badge.svg)](https://github.com/npow/sandrun/actions/workflows/ci.yml)
 [![PyPI](https://img.shields.io/pypi/v/sandrun)](https://pypi.org/project/sandrun/)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](LICENSE)
-[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/) [![Docs](https://img.shields.io/badge/docs-mintlify-18a34a?style=flat-square)](https://mintlify.com/npow/sandrun)
 
 Run Python functions and scripts in isolated sandboxes — locally or in the cloud.
 
