@@ -143,6 +143,7 @@ def resolve_micromamba() -> tuple[str | None, bool]:
     explicit = os.environ.get("SANDRUN_MICROMAMBA_PATH") or os.environ.get(
         "METAFLOW_SANDBOX_MICROMAMBA_PATH"
     )
+    path: str | None
     if explicit:
         path = explicit
         compatible = is_compatible_linux_micromamba(path)
