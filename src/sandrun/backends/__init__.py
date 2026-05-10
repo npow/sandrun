@@ -45,4 +45,5 @@ def get_backend(name: str) -> SandboxBackend:
 
     module = importlib.import_module(module_path, package=__name__)
     cls = getattr(module, class_name)
-    return cls()
+    instance: SandboxBackend = cls()
+    return instance

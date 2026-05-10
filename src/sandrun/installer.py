@@ -336,6 +336,10 @@ class UvDepInstaller(DepInstaller):
 
     _MANIFEST_NAME = "sandrun-uv-manifest.txt"
 
+    # Set by _from_pep723_path() when the installer is built from an inline-
+    # metadata PEP 723 script. None for the regular requirements-list flow.
+    _script_path: str | None = None
+
     def __init__(self, staging_dir: str | None = None) -> None:
         if staging_dir is None:
             self._staging_dir = tempfile.mkdtemp(prefix="sandrun-uv-deps-")
